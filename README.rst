@@ -55,6 +55,8 @@ In order to implement tracing in your system, add the following lines of code to
 
     # Callable that returns an `opentracing.Tracer` implementation.
     OPENTRACING_TRACER_CALLABLE = 'opentracing.Tracer'
+    # Class that wraps tracer and produces spans
+    OPENTRACING_TRACING_CLASS = 'django_opentracing.DjangoRestFrameworkTracing'
 
     # Parameters for the callable (Depending on the tracer implementation chosen)
     OPENTRACING_TRACER_PARAMETERS = {

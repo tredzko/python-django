@@ -31,12 +31,9 @@ class OpenTracingMiddleware(MiddlewareMixin):
         self.get_response = get_response
 
     def _init_tracing(self):
-        if getattr(settings, 'OPENTRACING_TRACER_CLASS', DjangoTracing) is not None:
-            tracer_class_callable = settings.OPENTRACING_TRACER_CLASS
-
-            if not callable(tracer_class_callable):
-                tracer_class_callable = import_string(tracer_class_callable)
-
+        tracer_class_callable = getattr(settings, 'OPENTRACING_TRACER_CLASS', DjangoTracing)
+        if not callable(tracer_class_callable):
+            tracer_class_callable = import_string(tracer_class_callable)
         if getattr(settings, 'OPENTRACING_TRACER', None) is not None:
             # Backwards compatibility.
             tracing = settings.OPENTRACING_TRACER
@@ -71,7 +68,13 @@ class OpenTracingMiddleware(MiddlewareMixin):
 
         # Potentially set the global Tracer (unless we rely on it already).
         if getattr(settings, 'OPENTRACING_SET_GLOBAL_TRACER', False):
-            initialize_global_tracer(tracing)
+            initialize_global_callable = getattr(
+                settings, 'OPENTRACING_SET_GLOBAL_CALLABLE', initialize_global_tracer
+            )
+            if not callable(initialize_global_callable):
+                initialize_global_callable = import_string(initialize_global_callable)
+
+            initialize_global_callable(tracing)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # determine whether this middleware should be applied
